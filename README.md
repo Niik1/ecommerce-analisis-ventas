@@ -75,7 +75,7 @@ flowchart LR
 
 ### 5.2 Modelo estrella ⭐
 
-![Modelo estrella](model/modelo_estrella.jog)
+![Modelo estrella](model/modelo_estrella.jpg)
 
 | Tipo | Tabla | Descripción | Clave |
 |---|---|---|---|
