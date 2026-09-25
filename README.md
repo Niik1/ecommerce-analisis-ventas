@@ -62,16 +62,49 @@ flowchart LR
 ---
 
 ## 5. Proceso paso a paso
-### 5.1 Limpieza con Power Query
-
-
-| Problema | Solución (paso aplicado) |
+| Problema | Solución aplicada |
 |---|---|
-| Fechas como texto | Cambiar tipo a fecha con configuración regional |
-| Nulos en [columna] | Reemplazar valores / Quitar filas |
-| Nombres inconsistentes | Recortar, minúsculas y reemplazar valores |
-| Varios archivos separados | Combinar archivos de una carpeta |
+| Fechas en 4 formatos distintos como texto | Cambio de tipo a fecha con configuración regional |
+| Precios con texto (`S/`, `S.`) mezclado con números | Columna personalizada: `Text.Remove` de letras/símbolos + `Text.Trim` |
+| Método de pago con variantes (`YAPE`, `yap`, `Tarje credito`, `Efectivoo`) | Columna condicional con `Text.Contains` para normalizar a 5 valores estándar |
+| Sucursal con nombres parciales (`anita`, `civico`, `Polvos Azu`) | Columna condicional con `Text.Contains` para normalizar a 4 sucursales |
+| Columnas originales sucias | Eliminadas y reemplazadas por sus versiones limpias, luego renombradas |
+| Tipos de datos finales | `Precio_Unitario` y `Cantidad` a entero, resto de columnas verificadas |
 
+<details>
+<summary>Ver código M completo (Power Query)</summary>
+
+```m
+let
+    Origen = Csv.Document(File.Contents("ventas_ecommerce.csv"),[Delimiter=",", Columns=14, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+    #"Encabezados promovidos" = Table.PromoteHeaders(Origen, [PromoteAllScalars=true]),
+    #"Tipo cambiado" = Table.TransformColumnTypes(#"Encabezados promovidos",{{"Fecha_Pedido", type date}}),
+    #"Filas ordenadas" = Table.Sort(#"Tipo cambiado",{{"Fecha_Pedido", Order.Ascending}}),
+    #"Texto en mayúsculas" = Table.TransformColumns(#"Filas ordenadas",{{"Estado_Pedido", Text.Upper, type text}, {"Sucursal", Text.Upper, type text}, {"Metodo_Pago", Text.Upper, type text}, {"Producto", Text.Upper, type text}, {"Subcategoria", Text.Upper, type text}, {"Categoria", Text.Upper, type text}, {"Nombres_Cliente", Text.Upper, type text}}),
+    #"Personalizada agregada" = Table.AddColumn(#"Texto en mayúsculas", "Precio_Limpio", each let
+        limpieza_base = Text.Remove([Precio_Unitario], {"a".."z", "A".."Z", "/", "."}),
+        limpieza_espacios = Text.Trim(limpieza_base)
+    in
+        limpieza_espacios),
+    #"Personalizada agregada1" = Table.AddColumn(#"Personalizada agregada", "Metodo_Pago_Limpio", each if Text.Contains([Metodo_Pago], "EFECT") or Text.Contains([Metodo_Pago], "EFECTIVOO") then "EFECTIVO"
+        else if Text.Contains([Metodo_Pago], "YAP") then "YAPE"
+        else if Text.Contains([Metodo_Pago], "TARJE CREDITO") or Text.Contains([Metodo_Pago], "TARJETA CREDITO") or Text.Contains([Metodo_Pago], "CREDITO") then "TARJETA DE CREDITO"
+        else if Text.Contains([Metodo_Pago], "DEBITO") then "TARJETA DE DEBITO"
+        else if Text.Contains([Metodo_Pago], "PLIN") then "PLIN"
+        else "REVISAR METODO"),
+    #"Personalizada agregada2" = Table.AddColumn(#"Personalizada agregada1", "Sucursal_Limpia", each if Text.Contains([Sucursal], "ROSADO") then "POLVOS ROSADOS"
+        else if Text.Contains([Sucursal], "AZULES") or Text.Contains([Sucursal], "AZU") then "POLVOS AZULES"
+        else if Text.Contains([Sucursal], "ANITA") or Text.Contains([Sucursal], "SANTA ANITA") or Text.Contains([Sucursal], "MALL") then "MALL SANTA ANITA"
+        else if Text.Contains([Sucursal], "CIVICO") or Text.Contains([Sucursal], "REALPLAZA") then "REAL PLAZA CENTRO CIVICO"
+        else "REVISAR SUCURSAL"),
+    #"Columnas quitadas" = Table.RemoveColumns(#"Personalizada agregada2",{"Precio_Unitario", "Metodo_Pago", "Sucursal"}),
+    #"Columnas con nombre cambiado" = Table.RenameColumns(#"Columnas quitadas",{{"Producto", "Nombre_Producto"}, {"Precio_Limpio", "Precio_Unitario"}, {"Metodo_Pago_Limpio", "Metodo_Pago"}, {"Sucursal_Limpia", "Sucursal"}}),
+    #"Tipo cambiado1" = Table.TransformColumnTypes(#"Columnas con nombre cambiado",{{"Sucursal", type text}, {"Metodo_Pago", type text}, {"Precio_Unitario", Int64.Type}, {"Cantidad", Int64.Type}})
+in
+    #"Tipo cambiado1"
+```
+
+</details>
 
 ### 5.2 Modelo estrella ⭐
 
