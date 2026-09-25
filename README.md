@@ -3,6 +3,10 @@
 > **Resumen en una frase:** Analicé [X] pedidos de [empresa/dataset] entre [año] y [año] para identificar [problema] y recomendar [acción], lo que podría [impacto estimado, ej. reducir 12% los retrasos de entrega].
 
 - Ejemplo: "Analicé 100 mil pedidos de Olist (Brasil, 2016-2018) para entender por qué cae la satisfacción del cliente y recomendar mejoras logísticas que podrían reducir 15% las malas reseñas." 
+> ⚠️ **Nota sobre los datos:** Este proyecto está inspirado en una experiencia laboral real, 
+> pero todos los datos (precios, nombres de clientes, cifras de ventas) son sintéticos 
+> y fueron generados para fines de portafolio, sin vulnerar ninguna información 
+> confidencial de la empresa original.
 
 ## 🔗 Enlaces rápidos
 
@@ -17,7 +21,7 @@
 
 ## 1. Problema de negocio
 
-**Contexto:** [2-3 líneas: quién es la empresa, qué vende, qué situación enfrenta.]
+**Contexto:**  Este proyecto está inspirado en mi experiencia trabajando para una empresa retail/e-commerce peruana dedicada a la venta de productos gaming con presencia en varios puntos de venta. Por motivos de confidencialidad, los datos reales de la empresa no pueden ser utilizados ni publicados: el dataset que se presenta en este repositorio es sintético, generado a partir de una estructura en consolidado, no todos los archivos reales, categorías de productos, pero con cifras, precios y datos de clientes ficticios. 
 
 **Preguntas que quería responder:**
 1. ¿[Pregunta 1, ej. cómo evolucionan las ventas mes a mes y qué categorías las impulsan]?
