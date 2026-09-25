@@ -62,6 +62,9 @@ flowchart LR
 ---
 
 ## 5. Proceso paso a paso
+
+### 5.1 Limpieza con Power Query
+
 | Problema | Solución aplicada |
 |---|---|
 | Fechas en 4 formatos distintos como texto | Cambio de tipo a fecha con configuración regional |
