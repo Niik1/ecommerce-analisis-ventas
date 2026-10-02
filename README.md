@@ -1,4 +1,4 @@
-# 🛒·Análisis de E-commerce de punta a punta
+# 🛒·Análisis de Ventas de un E-commerce 
 
 > **Resumen en una frase:** Analicé [X] pedidos de [empresa/dataset] entre [año] y [año] para identificar [problema] y recomendar [acción], lo que podría [impacto estimado, ej. reducir 12% los retrasos de entrega].
 
@@ -15,7 +15,6 @@
 | [Ver Dashboard Interactivo](URL) | [Ver Video Resumen](URL) |
 
 ![Vista previa del dashboard](dashboard/captura_principal.png)
-<!-- Un GIF del dashboard en uso también funciona muy bien aquí. -->
 
 ---
 
@@ -39,11 +38,10 @@
 
 ## 2. Hallazgos principales
 
-<!-- Llena esta sección AL FINAL, pero déjala arriba: es lo que más lee el reclutador. Siempre con números. -->
 
-- **La Caída oculta en Mall Santa Anita** aunque el acumulado 2024-2025 la muestra solo 4 puntos por debajo de la líder, al desagregar por año se identificó una caída sostenida durante 2025 (de ~S/ 47K en dic-2024 a un mínimo de ~S/ 9K en sep-2025), causada por un incremento en cancelaciones (5.6% → 9.4%) concentrado en la categoría Consolas (18.8% de cancelación), mientras el resto de la red mejoraba su tasa en el mismo periodo.
-- **Las Consolas concentran el valor, mientras que Accesorios concentra el volumen.** Consolas tiene el ticket promedio más alto (S/ 2,098, 6 veces el de Videojuegos) y genera 46% de la facturación total, mientras Accesorios es la categoría de mayor rotación (3,527 unidades) con el ticket más bajo — confirmando que el negocio depende fuertemente de una sola categoría para sus ingresos.
-- **El 36% de los clientes genera el 63.5% de las ventas.** los clientes recurrentes (2+ compras) representan poco más de un tercio de la base, pero casi dos tercios de la facturación — evidencia de que la fidelización tiene un retorno desproporcionado frente a la adquisición de nuevos clientes.
+- **La Caída oculta en Mall Santa Anita** aunque el acumulado del 2024 y 2025 la muestra es solo de 4 puntos por debajo de la líder, al desagregar por año se identificó una caída sostenida durante 2025 de S/ 47 mil en diciembre del 2024 a un mínimo de S/ 9 mil en septiembre del 2025, causada por un incremento en cancelaciones de 5.6% → 9.4% concentrado en la categoría Consolas con el 18.8% de cancelación, mientras el resto de la red mejoraba su tasa en el mismo periodo.
+- **Las Consolas concentran el valor, mientras que Accesorios concentra el volumen.** Consolas tiene el ticket promedio más alto de S/ 2,098, es 6 veces mas que el de Videojuegos y genera 46% de la facturación total, mientras Accesorios es la categoría de mayor rotación de 3,527 unidades con el ticket más bajo, confirmando que el negocio depende fuertemente de una sola categoría para sus ingresos.
+- **El 36% de los clientes genera el 63.5% de las ventas.** los clientes recurrentes que realizaron 2+ compras representan poco más de un tercio de la base, pero casi dos tercios de la facturación, evidencia de que la fidelización tiene un retorno desproporcionado frente a la adquisición de nuevos clientes.
 
 ---
 
@@ -60,20 +58,10 @@ flowchart LR
 
 ---
 
-## 4. Datos
 
-- **Fuente:** [nombre y enlace, ej. Brazilian E-Commerce Public Dataset by Olist, Kaggle]
-- **Periodo:** [fechas]
-- **Tamaño:** [X filas, Y tablas]
-- **Tablas principales:** `orders`, `order_items`, `customers`, `products`, `payments`, `reviews`, [...]
+## 4. Proceso paso a paso
 
-> ⚠️ Si el dataset es muy pesado, sube solo una muestra en `/data` y deja el enlace al original.
-
----
-
-## 5. Proceso paso a paso
-
-### 5.1 Limpieza con Power Query
+### 4.1 Limpieza con Power Query
 
 | Problema | Solución aplicada |
 |---|---|
@@ -119,7 +107,7 @@ in
 
 </details>
 
-### 5.2 Modelo estrella ⭐
+### 4.2 Modelo estrella
 
 ![Modelo estrella](model/modelo_estrella.jpg)
 
@@ -134,9 +122,9 @@ in
 
 **Relaciones:** todas de uno a muchos (1:*), con filtro en una sola dirección desde las dimensiones hacia la tabla de hechos.
 
-**Decisiones de modelado:** creé una tabla calendario propia para usar funciones de inteligencia de tiempo.
+**Decisiones de modelado:** creé una tabla calendario propia para usar funciones de inteligencia de tiempo y una tabla medidas DAX para ser organizado y no tener sueltas las medidas por todas las tablas.
 
-### 5.3 Medidas DAX 🧮
+### 4.3 Medidas DAX 
 
 Documentación completa en [`docs/medidas_dax.md`](docs/medidas_dax.md).
 
@@ -149,7 +137,7 @@ Documentación completa en [`docs/medidas_dax.md`](docs/medidas_dax.md).
 | % Crecimiento YoY | `DIVIDE([Ventas Totales] - [Ventas Año Anterior], [Ventas Año Anterior])` | Variación anual |
 | [Tu medida] | `[fórmula]` | [descripción] |
 
-### 5.4 Dashboard 📊
+### 4.4 Dashboard 
 
 **Página 1: Resumen ejecutivo** · KPIs, tendencia de ventas, top categorías
 ![Página 1](dashboard/pagina1.png)
@@ -161,7 +149,7 @@ Documentación completa en [`docs/medidas_dax.md`](docs/medidas_dax.md).
 
 ---
 
-## 6. Recomendaciones de negocio
+## 5. Recomendaciones de negocio
 
 
 1. Auditar el proceso de gestión de inventario de Consolas en Mall Santa Anita. La tasa de cancelación de Consolas en esta sucursal es 18.8% casi duplica el promedio de la red, y coincide con una caída sostenida de ventas durante 2025 de S/ 47 mil en diciembre 2024 a un mínimo de S/ 9 mil en septiembre 2025. Un patrón común en negocios con venta online y recojo en tienda es que el catálogo no se desactiva en tiempo real cuando el stock físico llega a cero, por lo que se aceptan y cobran pedidos que luego no se pueden cumplir dentro de la ventana de despacho, terminando en cancelación y devolución. Se recomienda auditar la sincronización entre inventario físico y catálogo online para esa sucursal, desactivando automáticamente productos sin stock disponible. Corregirlo podría recuperar hasta S/ 106,946 en ventas hoy perdidas por cancelación y revertir la caída sostenida que arrastra la sucursal desde inicios de 2025.
