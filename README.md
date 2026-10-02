@@ -24,10 +24,16 @@
 **Contexto:**  Este proyecto está inspirado en mi experiencia trabajando para una empresa retail/e-commerce peruana dedicada a la venta de productos gaming con presencia en varios puntos de venta. Por motivos de confidencialidad, los datos reales de la empresa no pueden ser utilizados ni publicados: el dataset que se presenta en este repositorio es sintético, generado a partir de una estructura en consolidado, no todos los archivos reales, categorías de productos, pero con cifras, precios y datos de clientes ficticios. 
 
 **Preguntas que quería responder:**
-1. ¿[Pregunta 1, ej. cómo evolucionan las ventas mes a mes y qué categorías las impulsan]?
-2. ¿[Pregunta 2, ej. qué regiones tienen más retrasos en entrega]?
-3. ¿[Pregunta 3, ej. cuál es la relación entre tiempo de entrega y satisfacción]?
-4. ¿[Pregunta 4, ej. qué segmento de clientes es más valioso]?
+1. ¿Qué sucursal genera más ventas totales y cuál menos?
+2. ¿La diferencia es marginal o hay una brecha grande?
+3. ¿Coincide la sucursal líder en ventas con la que tiene más órdenes, o vende menos órdenes pero de mayor valor?
+4. ¿Qué categoría tiene el ticket promedio más alto por línea?}
+5. ¿Qué categoría mueve más volumen pero factura menos?
+6. ¿Qué % de clientes compró más de una vez?
+7. ¿Ese grupo de clientes recurrentes representa una porción desproporcionada de las ventas?
+8. ¿Qué % total de pedidos se cancela?
+9. ¿La tasa de cancelación es pareja entre sucursales, o alguna se aleja del resto?
+10. ¿Las cancelaciones se concentran en alguna categoría en particular?
 
 ---
 
@@ -35,9 +41,9 @@
 
 <!-- Llena esta sección AL FINAL, pero déjala arriba: es lo que más lee el reclutador. Siempre con números. -->
 
-- 📈 **[Hallazgo 1]:** [dato concreto, ej. las ventas crecieron 45% en Q4, impulsadas por 3 categorías].
-- 🚚 **[Hallazgo 2]:** [dato concreto, ej. los pedidos con más de 10 días de entrega reciben 2.3x más reseñas negativas].
-- 👥 **[Hallazgo 3]:** [dato concreto, ej. solo 3% de clientes recompra, hay oportunidad de retención].
+- **La Caída oculta en Mall Santa Anita** aunque el acumulado 2024-2025 la muestra solo 4 puntos por debajo de la líder, al desagregar por año se identificó una caída sostenida durante 2025 (de ~S/ 47K en dic-2024 a un mínimo de ~S/ 9K en sep-2025), causada por un incremento en cancelaciones (5.6% → 9.4%) concentrado en la categoría Consolas (18.8% de cancelación), mientras el resto de la red mejoraba su tasa en el mismo periodo.
+- **Las Consolas concentran el valor, mientras que Accesorios concentra el volumen.** Consolas tiene el ticket promedio más alto (S/ 2,098, 6 veces el de Videojuegos) y genera 46% de la facturación total, mientras Accesorios es la categoría de mayor rotación (3,527 unidades) con el ticket más bajo — confirmando que el negocio depende fuertemente de una sola categoría para sus ingresos.
+- **El 36% de los clientes genera el 63.5% de las ventas.** los clientes recurrentes (2+ compras) representan poco más de un tercio de la base, pero casi dos tercios de la facturación — evidencia de que la fidelización tiene un retorno desproporcionado frente a la adquisición de nuevos clientes.
 
 ---
 
@@ -157,16 +163,13 @@ Documentación completa en [`docs/medidas_dax.md`](docs/medidas_dax.md).
 
 ## 6. Recomendaciones de negocio
 
-1. **[Recomendación 1]:** [acción concreta + impacto esperado].
-2. **[Recomendación 2]:** [acción concreta + impacto esperado].
-3. **[Recomendación 3]:** [acción concreta + impacto esperado].
+
+1. Auditar el proceso de gestión de inventario de Consolas en Mall Santa Anita. La tasa de cancelación de Consolas en esta sucursal es 18.8% casi duplica el promedio de la red, y coincide con una caída sostenida de ventas durante 2025 de S/ 47 mil en diciembre 2024 a un mínimo de S/ 9 mil en septiembre 2025. Un patrón común en negocios con venta online y recojo en tienda es que el catálogo no se desactiva en tiempo real cuando el stock físico llega a cero, por lo que se aceptan y cobran pedidos que luego no se pueden cumplir dentro de la ventana de despacho, terminando en cancelación y devolución. Se recomienda auditar la sincronización entre inventario físico y catálogo online para esa sucursal, desactivando automáticamente productos sin stock disponible. Corregirlo podría recuperar hasta S/ 106,946 en ventas hoy perdidas por cancelación y revertir la caída sostenida que arrastra la sucursal desde inicios de 2025.
+
+2. Lanzar una campaña de reactivación con cupón de segunda compra. Los clientes de compra única representan el 64% de la base, pero solo el 36% de las ventas, menos de la mitad del valor promedio de un cliente recurrente. Se recomienda enviarles por correo o mensaje de WhatsApp, usando los datos de contacto ya capturados en su primera compra. Un cupón de 10% o 15% de descuento en Accesorios o Videojuegos, válido por 30 días desde el envío. Elegir categorías de ticket bajo reduce el costo del incentivo por cliente, mientras que el plazo corto genera urgencia para convertir la segunda compra antes de que el cliente pierda interés.
+
+3. Ofrecer descuento cruzado en accesorios al comprar Consolas o Sillas. Accesorios es la categoría de mayor rotación con 3,527 unidades vendidas pero con el ticket promedio más bajo de S/ 341, mientras que Consolas y Sillas concentran el mayor valor por transacción. Se recomienda que, al comprar una Consola o Silla, el cliente reciba automáticamente un 15% de descuento en un accesorio asociado, por ejemplo un control adicional al comprar una consola, o un set de parlantes al comprar una silla gamer, aplicado en el mismo carrito de compra. Esto aumenta el ticket promedio de la transacción principal sin necesidad de atraer tráfico nuevo, aprovechando una compra que el cliente ya decidió hacer.
+
 
 ---
 
-## 7. Limitaciones y próximos pasos
-
-- [Limitación, ej. los datos no incluyen costos, así que no se puede calcular margen.]
-- [Próximo paso, ej. automatizar la actualización con un pipeline en Python.]
-- [Próximo paso, ej. agregar un modelo de predicción de ventas.]
-
----
