@@ -1,12 +1,8 @@
-# 🛒·Análisis de Ventas de un E-commerce 
+# ·GT Gaming Store - Análisis de Ventas de un E-commerce 
 
-> **Resumen en una frase:** Analicé [X] pedidos de [empresa/dataset] entre [año] y [año] para identificar [problema] y recomendar [acción], lo que podría [impacto estimado, ej. reducir 12% los retrasos de entrega].
+> **Resumen:** Analicé 5,432 líneas de pedido de 3,786 órdenes de una tienda de e-commerce y retail gaming peruana entre 2024 y 2025 para identificar la causa detrás de la caída de ventas en una de sus 4 sucursales, y recomendar acciones que podrían recuperar hasta S/ 106,946 en ventas perdidas por cancelación.
 
-- Ejemplo: "Analicé 100 mil pedidos de Olist (Brasil, 2016-2018) para entender por qué cae la satisfacción del cliente y recomendar mejoras logísticas que podrían reducir 15% las malas reseñas." 
-> ⚠️ **Nota sobre los datos:** Este proyecto está inspirado en una experiencia laboral real, 
-> pero todos los datos (precios, nombres de clientes, cifras de ventas) son sintéticos 
-> y fueron generados para fines de portafolio, sin vulnerar ninguna información 
-> confidencial de la empresa original.
+> ⚠️ **Nota sobre los datos:** Este proyecto está inspirado en una experiencia laboral real en el sector retail/e-commerce gaming. Por motivos de confidencialidad, todos los datos utilizados (precios, nombres de clientes, cifras de ventas, DNI) son **sintéticos**, generados para fines de portafolio. La estructura del negocio (categorías de producto, dinámica de sucursales, tipo de problemas operativos) refleja patrones reales del sector, pero ningún dato específico de la empresa original fue utilizado ni expuesto.
 
 ## 🔗 Enlaces rápidos
 
@@ -20,7 +16,7 @@
 
 ## 1. Problema de negocio
 
-**Contexto:**  Este proyecto está inspirado en mi experiencia trabajando para una empresa retail/e-commerce peruana dedicada a la venta de productos gaming con presencia en varios puntos de venta. Por motivos de confidencialidad, los datos reales de la empresa no pueden ser utilizados ni publicados: el dataset que se presenta en este repositorio es sintético, generado a partir de una estructura en consolidado, no todos los archivos reales, categorías de productos, pero con cifras, precios y datos de clientes ficticios. 
+**Contexto:**  Este proyecto está inspirado en mi experiencia trabajando para una empresa peruana de retail y e-commerce dedicada a la venta de productos gaming con presencia en 4 puntos de venta en Lima. Por motivos de confidencialidad, los datos reales de la empresa no pueden ser utilizados ni publicados: el dataset de este repositorio es sintético, construido a partir de la misma estructura de negocio (categorías de producto, dinámica de sucursales, comportamiento de compra), pero con cifras, precios, clientes y transacciones generados artificialmente.
 
 **Preguntas que quería responder:**
 1. ¿Qué sucursal genera más ventas totales y cuál menos?
@@ -113,39 +109,45 @@ in
 
 | Tipo | Tabla | Descripción | Clave |
 |---|---|---|---|
-| **Hechos** | `FACT_VENTAS` | Una fila por producto vendido en cada pedido | `ID_PEDIDO`, `product_id` |
-| Dimensión | `DIM_CLIENTES` | Datos del cliente | `DNI` |
-| Dimensión | `DIM_PRODUCTOS` | Producto, categoria y subcategoria | `SKU` |
-| Dimensión | `DIM_METODO_PAGO` | Datos del metodo pago | `ID_METODO_PAGO` |
-| Dimensión | `DIM_SUCURSAL` | Datos de la sucursal | `ID_SUCURSAL` |
-| Dimensión | `DIM_CALENDARIO` | Fechas, mes, trimestre, año | `DATE` |
+| **Hechos** | `FACT_VENTAS` | Una fila por producto vendido en cada pedido | `ID_PEDIDO`, `SKU`, `DNI`, `ID_METODO_PAGO`, `ID_SUCURSAL` |
+| Dimensión | `DIM_CLIENTE` | DNI y nombres del cliente | `DNI` |
+| Dimensión | `DIM_PRODUCTO` | Producto, categoría y subcategoría | `SKU` |
+| Dimensión | `DIM_METODO_PAGO` | Métodos de pago normalizados | `ID_METODO_PAGO` |
+| Dimensión | `DIM_SUCURSAL` | Las 4 sucursales | `ID_SUCURSAL` |
+| Dimensión | `DIM_CALENDARIO` | Fechas, mes, trimestre, año | `Date` |
 
 **Relaciones:** todas de uno a muchos (1:*), con filtro en una sola dirección desde las dimensiones hacia la tabla de hechos.
 
 **Decisiones de modelado:** creé una tabla calendario propia para usar funciones de inteligencia de tiempo y una tabla medidas DAX para ser organizado y no tener sueltas las medidas por todas las tablas.
 
-### 4.3 Medidas DAX 
+### 4.3 Medidas DAX
 
-Documentación completa en [`docs/medidas_dax.md`](docs/medidas_dax.md).
+Documentación completa de las 24 medidas del modelo en [`docs/medidas_dax.md`](docs/medidas_dax.md).
 
 | Medida | Fórmula | Qué mide |
 |---|---|---|
-| Ventas Totales | `SUM(fact_ventas[precio])` | Ingresos totales |
-| Pedidos | `DISTINCTCOUNT(fact_ventas[order_id])` | Número de pedidos únicos |
-| Ticket Promedio | `DIVIDE([Ventas Totales], [Pedidos])` | Gasto promedio por pedido |
-| Ventas Año Anterior | `CALCULATE([Ventas Totales], SAMEPERIODLASTYEAR(dim_calendario[fecha]))` | Ventas del mismo periodo del año pasado |
-| % Crecimiento YoY | `DIVIDE([Ventas Totales] - [Ventas Año Anterior], [Ventas Año Anterior])` | Variación anual |
-| [Tu medida] | `[fórmula]` | [descripción] |
+| Total Ventas | `CALCULATE(SUMX(FACT_VENTAS, FACT_VENTAS[Cantidad] * FACT_VENTAS[Precio_Unitario]), FACT_VENTAS[Estado_Pedido] = "ENTREGADO")` | Ingresos totales, excluyendo pedidos cancelados |
+| Ticket Promedio | `DIVIDE([Total Ventas], [Total Ordenes])` | Gasto promedio por orden de compra |
+| % Cancelacion | `DIVIDE([Ordenes Canceladas], [Ordenes Totales (Todas)], 0)` | Proporción de órdenes canceladas sobre el total |
+| % Ventas por categoria | `DIVIDE([Total Ventas], CALCULATE([Total Ventas], ALL(DIM_PRODUCTO[Categoria])), 0)` | Participación de cada categoría dentro de un contexto (ej. por sucursal) |
+| Clientes Recurrentes | `COUNTROWS(FILTER(VALUES(DIM_CLIENTE[DNI_Cliente]), CALCULATE(DISTINCTCOUNT(FACT_VENTAS[Num_Orden_Compra]), FACT_VENTAS[Estado_Pedido] = "ENTREGADO") > 1))` | Clientes con 2 o más compras entregadas |
+| Variacion Ventas MSA | `DIVIDE([Ventas 2025 MSA] - [Ventas 2024 MSA], [Ventas 2024 MSA], 0)` | Variación % de ventas de Mall Santa Anita, año contra año |
 
-### 4.4 Dashboard 
+### 4.4 Dashboard
 
-**Página 1: Resumen ejecutivo** · KPIs, tendencia de ventas, top categorías
-![Página 1](dashboard/pagina1.png)
+**Página 1: Resumen Ejecutivo** · KPIs generales (Ventas, Ticket Promedio, Órdenes, % Cancelación), tendencia de ventas mensual por sucursal (2024-2025), ranking de sucursales y distribución de ventas por categoría.
+![Página 1 - Resumen Ejecutivo](dashboard/pagina1_resumen.png)
 
-**Página 2: [Logística / Clientes / Producto]** · [qué muestra]
-![Página 2](dashboard/pagina2.png)
+**Página 2: Sucursal y Categoría** · Mix de categorías por sucursal, ticket promedio comparado entre sucursales y entre categorías, Top 5 productos por ventas y por unidades vendidas.
+![Página 2 - Sucursal y Categoría](dashboard/pagina2_sucursal_categoria.png)
 
-**Interactividad:** [segmentadores por fecha y región, drill-through, tooltips personalizados, etc.]
+**Página 3: Clientes y Métodos de Pago** · Segmentación de clientes (recurrentes vs. compra única) y su peso en las ventas totales, distribución de métodos de pago por sucursal.
+![Página 3 - Clientes y Métodos de Pago](dashboard/pagina3_clientes_pagos.png)
+
+**Página 4: Caso Mall Santa Anita** · Análisis dedicado al hallazgo principal del proyecto: evolución de ventas y cancelaciones 2024 vs. 2025 en esta sucursal frente al promedio de la red, y desglose de cancelaciones por categoría para identificar la causa raíz.
+![Página 4 - Caso Mall Santa Anita](dashboard/pagina4_caso_msa.png)
+
+**Interactividad:** segmentadores de Año, Mes y Sucursal sincronizados entre las 4 páginas (excepto en la página "Caso Mall Santa Anita", donde la sucursal queda fija para mantener el foco del análisis), navegación mediante barra lateral con botones.
 
 ---
 
